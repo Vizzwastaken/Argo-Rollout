@@ -1,0 +1,71 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: my-app
+  labels:
+    app: my-app
+spec:
+  replicas: 10
+  selector:
+    matchLabels:
+      app: my-app
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  template:
+    metadata:
+      labels:
+        app: my-app
+    spec:
+      containers:
+      - name: my-app
+        image: argoproj/rollouts-demo:green
+        ports:
+        - containerPort: 8080
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: my-app
+spec:
+  selector:
+    app: my-app
+  ports:
+  - port: 80
+    targetPort: 8080
+---
+apiVersion: networking.istio.io/v1beta1
+kind: DestinationRule
+metadata:
+  name: my-app
+spec:
+  host: my-app
+  subsets:
+  - name: stable
+    labels:
+      app: my-app
+  - name: canary
+    labels:
+      app: my-app
+---
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: my-app
+spec:
+  hosts:
+  - my-app
+  http:
+  - name: default
+    route:
+    - destination:
+        host: my-app
+        subset: stable
+      weight: 100
+    - destination:
+        host: my-app
+        subset: canary
+      weight: 0
