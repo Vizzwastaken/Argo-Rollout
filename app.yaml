@@ -40,7 +40,8 @@ spec:
   hosts:
   - my-app
   http:
-  - route:
+  - name: http 
+    route:
     - destination:
         host: my-app
         subset: stable
