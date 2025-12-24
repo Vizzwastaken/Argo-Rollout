@@ -37,6 +37,11 @@ spec:
       - analysis:
           templates:
           - templateName: success-rate
+            args:
+            - name: namespace
+              value: canary-demo
+            - name: service-name
+              value: my-app
       - pause: { duration: 1m }
       - setWeight: 30
       - pause: { duration: 1m }
