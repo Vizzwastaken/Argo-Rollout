@@ -6,11 +6,7 @@ metadata:
 spec:
   args:
   - name: service-name
-    value: my-app
   - name: namespace
-    valueFrom:
-      fieldRef:
-        fieldPath: metadata.namespace
   metrics:
   - name: success-rate
     interval: 30s
