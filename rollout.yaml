@@ -1,8 +1,8 @@
----
 apiVersion: argoproj.io/v1alpha1
 kind: Rollout
 metadata:
   name: my-app
+  namespace: canary-demo
 spec:
   replicas: 10
   selector:
@@ -15,33 +15,32 @@ spec:
     spec:
       containers:
       - name: my-app
-        image: argoproj/rollouts-demo:green
+        image: argoproj/rollouts-demo:blue
         ports:
         - containerPort: 8080
   strategy:
     canary:
-      maxSurge: 1
-      maxUnavailable: 0
       trafficRouting:
         istio:
           virtualService:
             name: my-app
             routes:
-            - default
+            - http
           destinationRule:
             name: my-app
             stableSubsetName: stable
             canarySubsetName: canary
+      maxSurge: 1
+      maxUnavailable: 0
       steps:
       - setWeight: 10
-      - pause:
-          duration: 60s
+      - analysis:
+          templates:
+          - templateName: success-rate
+      - pause: { duration: 1m }
       - setWeight: 30
-      - pause:
-          duration: 60s
+      - pause: { duration: 1m }
       - setWeight: 50
-      - pause:
-          duration: 60s
+      - pause: { duration: 1m }
       - setWeight: 80
-      - pause:
-          duration: 60s
+      - pause: { duration: 1m }
