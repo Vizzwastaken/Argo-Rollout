@@ -12,6 +12,7 @@ spec:
     metadata:
       labels:
         app: my-app
+        version: stable
     spec:
       containers:
       - name: my-app
@@ -20,6 +21,12 @@ spec:
         - containerPort: 8080
   strategy:
     canary:
+      canaryMetadata:
+        labels:
+          version: canary
+      stableMetadata:
+        labels:
+          version: stable
       trafficRouting:
         istio:
           virtualService:
@@ -34,14 +41,15 @@ spec:
       maxUnavailable: 0
       steps:
       - setWeight: 10
+      - pause: { duration: 10s }
       - analysis:
           templates:
           - templateName: success-rate
           args:
+          - name: service-name
+            value: my-app
           - name: namespace
             value: canary-demo
-          - name: serviceName
-            value: my-app
       - pause: { duration: 1m }
       - setWeight: 30
       - pause: { duration: 1m }
